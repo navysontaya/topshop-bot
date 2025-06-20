@@ -1,48 +1,45 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>Topshop Bot</title>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; background: #f2f2f2; }
-    input, textarea { width: 100%; padding: 0.5rem; font-size: 1rem; }
-    button { margin-top: 1rem; padding: 0.5rem 1rem; font-size: 1rem; }
-    .result { margin-top: 2rem; background: #fff; padding: 1rem; border-radius: 8px; }
-  </style>
-</head>
-<body>
-  <h1>🔗 ระบบสร้างโพสต์ Shopee</h1>
-  <input id="shopeeLink" placeholder="วางลิงก์ Shopee..." />
-  <button onclick="generate()">สร้างโพสต์</button>
-
-  <div class="result" id="output" style="display:none;">
-    <h3>โพสต์:</h3>
-    <textarea id="postText" rows="5"></textarea>
-    <button onclick="copyText()">คัดลอก</button>
-
-    <h4>คอมเมนต์ลิงก์:</h4>
-    <code id="comment"></code>
-  </div>
-
+  <meta charset="UTF-8">
+  <title>Shopee Affiliate Generator</title>
   <script>
-    function generate() {
-      const link = document.getElementById("shopeeLink").value.trim();
-      const fullLink = link.includes("?") ? link + "&sub_id=psfb168" : link + "?sub_id=psfb168";
-
-      document.getElementById("postText").value =
-`✨ สัมผัสแบบนี้... คุณเคยลองหรือยัง?
-🚚 พร้อมส่ง ⚡️ ส่งไว 💰 เก็บเงินปลายทาง
-👉 กดตรงนี้: ${fullLink}`;
-      document.getElementById("comment").innerText = fullLink;
-      document.getElementById("output").style.display = "block";
+    async function getProductInfo() {
+      const url = document.getElementById('url').value;
+      const formData = new FormData();
+      formData.append("url", url);
+      const response = await fetch("/extract", {
+        method: "POST",
+        body: formData
+      });
+      const data = await response.json();
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+      document.getElementById("result").innerHTML = `
+        <h3>${data.title}</h3>
+        <img src="${data.image}" width="200" />
+        <p>💸 ราคา: ${data.price} บาท</p>
+        <p>📉 ส่วนลด: ${data.discount}</p>
+        <textarea id="post" rows="5" style="width:100%">${data.post}</textarea>
+        <button onclick="copyPost()">📋 คัดลอกโพสต์</button>
+      `;
     }
 
-    function copyText() {
-      const text = document.getElementById("postText");
+    function copyPost() {
+      const text = document.getElementById("post");
       text.select();
       document.execCommand("copy");
-      alert("คัดลอกเรียบร้อยแล้ว!");
+      alert("คัดลอกโพสต์แล้ว!");
     }
   </script>
+</head>
+<body>
+  <h2>🌟 สร้างโพสต์ Shopee Affiliate</h2>
+  <input type="text" id="url" placeholder="วางลิงก์ Shopee ที่นี่" style="width:100%" />
+  <button onclick="getProductInfo()">ดึงข้อมูลสินค้า</button>
+  <hr>
+  <div id="result"></div>
 </body>
 </html>
