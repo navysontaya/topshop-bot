@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Shopee Affiliate Generator</title>
+  <script>
+    async function getProductInfo() {
+      const url = document.getElementById('url').value;
+      const formData = new FormData();
+      formData.append("url", url);
+      const response = await fetch("/extract", {
+        method: "POST",
+        body: formData
+      });
+      const data = await response.json();
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+      document.getElementById("result").innerHTML = `
+        <h3>${data.title}</h3>
+        <img src="${data.image}" width="200" />
+        <p>💸 ราคา: ${data.price} บาท</p>
+        <p>📉 ส่วนลด: ${data.discount}</p>
+        <textarea id="post" rows="5" style="width:100%">${data.post}</textarea>
+        <button onclick="copyPost()">📋 คัดลอกโพสต์</button>
+      `;
+    }
+
+    function copyPost() {
+      const text = document.getElementById("post");
+      text.select();
+      document.execCommand("copy");
+      alert("คัดลอกโพสต์แล้ว!");
+    }
+  </script>
+</head>
+<body>
+  <h2>🌟 สร้างโพสต์ Shopee Affiliate</h2>
+  <input type="text" id="url" placeholder="วางลิงก์ Shopee ที่นี่" style="width:100%" />
+  <button onclick="getProductInfo()">ดึงข้อมูลสินค้า</button>
+  <hr>
+  <div id="result"></div>
+</body>
+</html>
