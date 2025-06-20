@@ -5,6 +5,13 @@ import re
 
 app = Flask(__name__)
 
+def resolve_shopee_shortlink(url):
+    try:
+        response = requests.get(url, allow_redirects=True, timeout=5)
+        return response.url
+    except Exception:
+        return url
+
 def extract_product_info(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
@@ -34,8 +41,9 @@ def extract():
     if not url or "shopee" not in url:
         return jsonify({"error": "กรุณาวางลิงก์ Shopee ที่ถูกต้อง"})
 
-    data = extract_product_info(url)
-    aff_url = url.split('?')[0] + "?sub_id=psfb168"
+    resolved_url = resolve_shopee_shortlink(url)
+    data = extract_product_info(resolved_url)
+    aff_url = resolved_url.split('?')[0] + "?sub_id=psfb168"
 
     post_text = f"✨ สัมผัสแบบนี้... คุณเคยลองหรือยัง?\n🚚 พร้อมส่ง ⚡️ ส่งไว 💰 เก็บเงินปลายทาง\n👉 กดตรงนี้: {aff_url}"
 
